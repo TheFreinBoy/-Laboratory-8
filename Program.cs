@@ -1,53 +1,93 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
+
 class Program
 {
     static void Main()
     {
-        /*Знищити T елементів, починаючи з номеру К(якщо, починаючи з номера К, елементи є, але менше, чим
-        T штук — знищити, скільки є; однак, якщо К від'ємне, не робити нічого).*/
-        Console.OutputEncoding = Encoding.UTF8;
-        int[] array = EnteringArray();
-        Console.Write("Введіть елемент К:");
-        int K = int.Parse(Console.ReadLine());
-        Console.Write("Введіть елемент Т:");
-        int T = int.Parse(Console.ReadLine());
-       
-        RemoveElements(ref array, K, T);
+        Random rand = new Random();
+        int a = 1; // мінімальна кількість стовпців
+        int b = 5; // максимальна кількість стовпців
+        int rowCount = 4; // кількість рядків у матриці C
 
-        PrintArray(array);
+        int[][] C = CreateRandomMatrix(rand, a, b, rowCount);
+        PrintMatrix("Матриця C:", C);
+
+        Queue<int> F = CopyElementsToQueue(C);
+        F = SortQueue(F);
+
+        int[,] Q = CreateSquareMatrix(F);
+        PrintMatrix("Квадратна матриця Q:", Q);
     }
-    static int[] EnteringArray()
+
+    static int[][] CreateRandomMatrix(Random rand, int a, int b, int rowCount)
     {
-        Console.Write("Введіть елементи масиву через пробіл:");
-        string input = Console.ReadLine();
-        int[] array = Array.ConvertAll(input.Split(), int.Parse);
-        return array;
+        int[][] C = new int[rowCount][];
+        for (int i = 0; i < rowCount; i++)
+        {
+            int colCount = rand.Next(a, b + 1);
+            C[i] = new int[colCount];
+            for (int j = 0; j < colCount; j++)
+            {
+                C[i][j] = rand.Next(100); // випадкові числа від 0 до 99
+            }
+        }
+        return C;
     }
-    static void PrintArray(int[] array)
+
+    static void PrintMatrix(string title, int[][] matrix)
     {
-        Console.Write("Відповідь:");
-        for (int i = 0;i <array.Length;i++)
+        Console.WriteLine(title);
+        foreach (var row in matrix)
         {
-            Console.Write($"{array[i]} ");
+            Console.WriteLine(string.Join(" ", row));
         }
-        Console.ReadKey();
     }
-    static void RemoveElements(ref int[] array, int K, int T)
+
+    static void PrintMatrix(string title, int[,] matrix)
     {
-        if (K < 0)
+        Console.WriteLine(title);
+        int n = matrix.GetLength(0);
+        for (int i = 0; i < n; i++)
         {
-            return;
+            for (int j = 0; j < n; j++)
+            {
+                Console.Write(matrix[i, j] + " ");
+            }
+            Console.WriteLine();
         }
-        if (K >= array.Length)
+    }
+
+    static Queue<int> CopyElementsToQueue(int[][] matrix)
+    {
+        Queue<int> queue = new Queue<int>();
+        foreach (var row in matrix)
         {
-            return;
+            foreach (var elem in row)
+            {
+                queue.Enqueue(elem);
+            }
         }
-        int elementsToRemove = Math.Min(T, array.Length - K);
-        for (int i = K; i < array.Length - elementsToRemove; i++)
+        return queue;
+    }
+
+    static Queue<int> SortQueue(Queue<int> queue)
+    {
+        int[] sortedArray = queue.ToArray();
+        Array.Sort(sortedArray);
+        return new Queue<int>(sortedArray);
+    }
+
+    static int[,] CreateSquareMatrix(Queue<int> queue)
+    {
+        int totalElements = queue.Count;
+        int n = (int)Math.Floor(Math.Sqrt(totalElements));
+
+        int[,] matrix = new int[n, n];
+        for (int i = 0; i < n * n; i++)
         {
-            array[i] = array[i + elementsToRemove];
+            matrix[i / n, i % n] = queue.Dequeue();
         }
-        Array.Resize(ref array, array.Length - elementsToRemove);
+        return matrix;
     }
 }
